@@ -1,11 +1,11 @@
 import sys
 from PyQt5.QtWidgets import QApplication
-from ui.login_view import LoginView
+from ui.main_view import MainView
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
 
-    login_view = LoginView()
-    login_view.show()
+    main_view = MainView()
+    main_view.show()
 
     sys.exit(app.exec_())
