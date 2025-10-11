@@ -1,8 +1,10 @@
 from PyQt5.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QMessageBox
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import pyqtSignal, Qt
+from PyQt5.QtGui import QCursor
 from tcp_client import TCPClient
 from .main_view import MainView
 from uuid import uuid4
+from utils.ui_helper import set_background
 
 class LoginView(QWidget):
     message_received = pyqtSignal(dict)
@@ -10,24 +12,37 @@ class LoginView(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.client = TCPClient("172.11.32.112", 5000)
+        self.client = TCPClient("localhost", 5000)
 
         self.setWindowTitle("Login Form")
         self.resize(500, 400)
 
+        set_background(self, "demo_background.jpg")
+
         self.label_username = QLabel("Username:")
         self.input_username = QLineEdit()
+        self.input_username.setPlaceholderText("Nhập username")
+        self.input_username.setFixedHeight(40)
         
         self.label_password = QLabel("Password:")
         self.input_password = QLineEdit()
+        self.input_password.setPlaceholderText("Nhập password")
+        self.input_password.setFixedHeight(40)
         self.input_password.setEchoMode(QLineEdit.Password)
         
-        self.button_login = QPushButton("Login")
+        self.button_login = QPushButton("Đăng nhập")
         self.button_login.setStyleSheet("background-color: #2196F3; color: white;")
+        self.button_login.setFixedWidth(100)
+        self.button_login.setFixedHeight(40)
+        self.button_login.setCursor(QCursor(Qt.PointingHandCursor))
         self.button_login.clicked.connect(self.handle_login)
 
-        self.button_register = QPushButton("Register")
+        self.label_button_register = QLabel("Chưa có tài khoản?")
+        self.button_register = QPushButton("Đăng ký ngay")
         self.button_register.setStyleSheet("background-color: #4CAF50; color: white;")
+        self.button_register.setFixedWidth(100)
+        self.button_register.setFixedHeight(40)
+        self.button_register.setCursor(QCursor(Qt.PointingHandCursor))
         self.button_register.clicked.connect(self.go_to_register.emit)
 
         layout = QVBoxLayout()
@@ -42,9 +57,41 @@ class LoginView(QWidget):
         password_row.addWidget(self.input_password)
         layout.addLayout(password_row)
         
-        layout.addWidget(self.button_login)
-        layout.addWidget(self.button_register)
-        self.setLayout(layout)
+        login_row = QHBoxLayout()
+        login_row.addStretch(1)
+        login_row.addWidget(self.button_login)
+        login_row.addStretch(1)
+        layout.addLayout(login_row)
+        
+        register_row = QHBoxLayout()
+        register_row.addStretch(1)
+        register_row.addWidget(self.label_button_register)
+        register_row.addWidget(self.button_register)
+        register_row.addStretch(1)
+        layout.addLayout(register_row)
+        
+        container = QWidget(self)
+        container.setObjectName("loginContainer")
+        container.setStyleSheet("""
+            #loginContainer {
+                background-color: rgba(0, 0, 0, 0.5);
+                color: white;
+                border-radius: 8px;
+            }
+            #loginContainer QLabel, #loginContainer QPushButton {
+                color: white;
+                font-size: 14px;
+            }
+            #loginContainer QLineEdit {
+                background-color: rgba(0, 0, 0, 0.3);
+                color: white;
+                border-radius: 5px;
+                padding: 5px;
+                font-size: 14px;
+            }
+        """)
+        container.setGeometry(60, 80, 380, 250)
+        container.setLayout(layout)
 
         self.message_received.connect(self.on_receive_from_server)
         self.client.on_message = self._handle_tcp_message

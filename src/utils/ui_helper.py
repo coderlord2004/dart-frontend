@@ -1,5 +1,7 @@
-import os
+from PyQt5.QtWidgets import QWidget
 from PyQt5.QtGui import QPixmap, QPalette, QBrush
+from PyQt5.QtCore import Qt
+import os
 
 def set_background(widget, image_name: str):
     abs_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "assets", image_name))
@@ -12,8 +14,18 @@ def set_background(widget, image_name: str):
         print(f"[ERROR] Cannot load pixmap: {abs_path}")
         return
 
-    palette = widget.palette()
-    palette.setBrush(widget.backgroundRole(), QBrush(pixmap))
-    widget.setPalette(palette)
-    widget.setAutoFillBackground(True)
-    print(f"[INFO] Background loaded successfully from: {abs_path}")
+    def update_background():
+        scaled = pixmap.scaled(
+            widget.size(),
+            Qt.KeepAspectRatioByExpanding,
+            Qt.SmoothTransformation
+        )
+        palette = widget.palette()
+        palette.setBrush(widget.backgroundRole(), QBrush(scaled))
+        widget.setPalette(palette)
+        widget.setAutoFillBackground(True)
+
+    update_background()
+    widget.resizeEvent = lambda event: update_background()
+
+    print(f"[INFO] Background loaded and auto-scaled from: {abs_path}")
