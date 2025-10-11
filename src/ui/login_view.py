@@ -11,6 +11,17 @@ class LoginView(QWidget):
     message_received = pyqtSignal(dict)
     go_to_register = pyqtSignal()
 
+    def center_container(self):
+        parent_width = self.width()
+        parent_height = self.height()
+        container_x = (parent_width - self.container_width) // 2
+        container_y = (parent_height - self.container_height) // 2
+        self.container.setGeometry(container_x, container_y, self.container_width, self.container_height)
+        
+    def resizeEvent(self, event):
+        self.center_container()
+        super().resizeEvent(event)
+
     def __init__(self):
         super().__init__()
         self.client = TCPClient(HOST, PORT)
@@ -71,9 +82,12 @@ class LoginView(QWidget):
         register_row.addStretch(1)
         layout.addLayout(register_row)
         
-        container = QWidget(self)
-        container.setObjectName("loginContainer")
-        container.setStyleSheet("""
+
+        self.container_width = 380
+        self.container_height = 250
+        self.container = QWidget(self)
+        self.container.setObjectName("loginContainer")
+        self.container.setStyleSheet("""
             #loginContainer {
                 background-color: rgba(0, 0, 0, 0.5);
                 color: white;
@@ -91,9 +105,9 @@ class LoginView(QWidget):
                 font-size: 14px;
             }
         """)
-        container.setGeometry(60, 80, 380, 250)
-        container.setLayout(layout)
-
+        self.container.setLayout(layout)
+        self.center_container()
+        
         self.message_received.connect(self.on_receive_from_server)
         self.client.on_message = self._handle_tcp_message
         self.client.connect()

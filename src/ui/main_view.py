@@ -1,6 +1,6 @@
 
 from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, QHBoxLayout, QPushButton, QTableWidget, QTableWidgetItem
-from src.tcp_client import TCPClient
+from tcp_client import TCPClient
 import threading
 
 class MainView(QWidget):
