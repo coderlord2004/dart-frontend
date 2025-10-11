@@ -5,6 +5,7 @@ from tcp_client import TCPClient
 from .main_view import MainView
 from uuid import uuid4
 from utils.ui_helper import set_background
+from utils.constants import WINDOW_WIDTH, WINDOW_HEIGHT, HOST, PORT
 
 class LoginView(QWidget):
     message_received = pyqtSignal(dict)
@@ -12,10 +13,10 @@ class LoginView(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.client = TCPClient("localhost", 5000)
+        self.client = TCPClient(HOST, PORT)
 
         self.setWindowTitle("Login Form")
-        self.resize(500, 400)
+        self.resize(WINDOW_WIDTH, WINDOW_HEIGHT)
 
         set_background(self, "demo_background.jpg")
 

@@ -6,17 +6,29 @@ from PyQt5.QtCore import pyqtSignal, Qt
 from PyQt5.QtGui import QCursor
 from tcp_client import TCPClient
 from utils.ui_helper import set_background
+from utils.constants import WINDOW_WIDTH, WINDOW_HEIGHT, HOST, PORT
 
 class RegisterView(QWidget):
+
     message_received = pyqtSignal(dict)
     go_to_login = pyqtSignal()
+    def center_container(self):
+        parent_width = self.width()
+        parent_height = self.height()
+        container_x = (parent_width - self.container_width) // 2
+        container_y = (parent_height - self.container_height) // 2
+        self.container.setGeometry(container_x, container_y, self.container_width, self.container_height)
+
+    def resizeEvent(self, event):
+        self.center_container()
+        super().resizeEvent(event)
 
     def __init__(self):
         super().__init__()
-        self.client = TCPClient("localhost", 5000)
+        self.client = TCPClient(HOST, PORT)
 
         self.setWindowTitle("Register Form")
-        self.resize(500, 400)
+        self.resize(WINDOW_WIDTH, WINDOW_HEIGHT)
         
         set_background(self, "demo_background.jpg")
         
@@ -71,10 +83,13 @@ class RegisterView(QWidget):
         login_row.addStretch(1)
         layout.addLayout(login_row)
 
-        container = QWidget(self)
-        container.setLayout(layout)
-        container.setObjectName("registerContainer")
-        container.setStyleSheet("""
+
+        self.container_width = 380
+        self.container_height = 250
+        self.container = QWidget(self)
+        self.container.setLayout(layout)
+        self.container.setObjectName("registerContainer")
+        self.container.setStyleSheet("""
             #registerContainer {
                 background-color: rgba(0, 0, 0, 0.5);
                 color: white;
@@ -92,7 +107,7 @@ class RegisterView(QWidget):
                 font-size: 14px;
             }
         """)
-        container.setGeometry(60, 80, 380, 250)
+        self.center_container()
         
         self.message_received.connect(self.on_receive_from_server)
         self.client.on_message = self._handle_tcp_message

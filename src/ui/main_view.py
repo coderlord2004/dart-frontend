@@ -1,33 +1,53 @@
-from PyQt5.QtWidgets import QWidget, QLabel, QLineEdit, QTableWidget, QAbstractItemView, QVBoxLayout, QHBoxLayout, QPushButton
+
+from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, QHBoxLayout, QPushButton, QTableWidget, QTableWidgetItem
+from src.tcp_client import TCPClient
+import threading
 
 class MainView(QWidget):
+
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("Game")
-        self.resize(500, 400)
+        self.setWindowTitle("Danh sách người chơi online")
+        self.resize(600, 400)
 
-        self.label_search_player = QLabel("Search Player:")
-        self.input_search_player = QLineEdit()
+        title = QLabel("Người chơi đang online")
+        title.setStyleSheet("font-size: 20px; font-weight: bold; margin-bottom: 10px;")
 
-        self.table_search_player = QTableWidget()
-        self.table_search_player.setRowCount(5)
-        self.table_search_player.setColumnCount(1)
-
-        self.label_search_top_player = QLabel("Search Top Player:")
-        self.input_search_top_player = QLineEdit()
-
-        self.table_top_player = QTableWidget()
-        self.table_top_player.setRowCount(5)
-        self.table_top_player.setColumnCount(1)
+        # Table for online players
+        self.table = QTableWidget()
+        self.table.setColumnCount(4)
+        self.table.setHorizontalHeaderLabels(["Tên", "Tổng điểm", "Trạng thái", "Thách đấu"])
+        self.table.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.table.setSelectionBehavior(QTableWidget.SelectRows)
+        self.table.setSelectionMode(QTableWidget.SingleSelection)
 
         layout = QVBoxLayout()
-        layout.addWidget(self.label_search_player)
-        layout.addWidget(self.input_search_player)
-        layout.addWidget(self.table_search_player)
-        
-        layout.addWidget(self.label_search_top_player)
-        layout.addWidget(self.input_search_top_player)
-        layout.addWidget(self.table_top_player)
+        layout.addWidget(title)
+        layout.addWidget(self.table)
         self.setLayout(layout)
+
+        # TCP client setup
+        self.tcp_client = TCPClient()
+        self.tcp_client.on_message = self.on_message
+        threading.Thread(target=self.tcp_client.connect, daemon=True).start()
+
+        threading.Timer(0.5, self.fetch_online_players).start()
+
+    def fetch_online_players(self):
+        if self.tcp_client.is_connected:
+            self.tcp_client.send_object({"command": "get_online_players"})
+
+    def on_message(self, data):
+        if data.get("command") == "online_players":
+            players = data.get("players", [])
+            self.table.setRowCount(len(players))
+            for row, player in enumerate(players):
+                self.table.setItem(row, 0, QTableWidgetItem(player.get("name", "")))
+                self.table.setItem(row, 1, QTableWidgetItem(str(player.get("score", 0))))
+                status = player.get("status", "")
+                self.table.setItem(row, 2, QTableWidgetItem(status))
+                btn = QPushButton("Thách đấu")
+                btn.setEnabled(status == "Đang rỗi")
+                self.table.setCellWidget(row, 3, btn)
 
