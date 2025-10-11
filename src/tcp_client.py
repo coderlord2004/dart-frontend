@@ -63,7 +63,6 @@ class TCPClient:
             print(f"[CLIENT] Send failed: {e}")
 
     def disconnect(self):
-        """Đóng kết nối an toàn"""
         self.is_connected = False
         try:
             if self.fp and not self.fp.closed:

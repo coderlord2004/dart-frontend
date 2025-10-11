@@ -1,23 +1,33 @@
-from PyQt5.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QMessageBox
-from PyQt5.QtCore import pyqtSignal
-from .login_view import LoginView
-from .register_view import RegisterView
+from PyQt5.QtWidgets import QWidget, QLabel, QLineEdit, QTableWidget, QAbstractItemView, QVBoxLayout, QHBoxLayout, QPushButton
 
 class MainView(QWidget):
-    message_received = pyqtSignal(dict)
-
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("Dart Duel")
+        self.setWindowTitle("Game")
         self.resize(500, 400)
 
-        self.button_register_view = QPushButton("Register")
-        self.button_register_view.clicked.connect(lambda: RegisterView())
-        self.button_login_view = QPushButton("Login")
-        self.button_register_view.clicked(lambda: LoginView())
+        self.label_search_player = QLabel("Search Player:")
+        self.input_search_player = QLineEdit()
+
+        self.table_search_player = QTableWidget()
+        self.table_search_player.setRowCount(5)
+        self.table_search_player.setColumnCount(1)
+
+        self.label_search_top_player = QLabel("Search Top Player:")
+        self.input_search_top_player = QLineEdit()
+
+        self.table_top_player = QTableWidget()
+        self.table_top_player.setRowCount(5)
+        self.table_top_player.setColumnCount(1)
 
         layout = QVBoxLayout()
-        layout.addWidget(self.button_register_view)
-        layout.addWidget(self.button_login_view)
+        layout.addWidget(self.label_search_player)
+        layout.addWidget(self.input_search_player)
+        layout.addWidget(self.table_search_player)
+        
+        layout.addWidget(self.label_search_top_player)
+        layout.addWidget(self.input_search_top_player)
+        layout.addWidget(self.table_top_player)
         self.setLayout(layout)
+
